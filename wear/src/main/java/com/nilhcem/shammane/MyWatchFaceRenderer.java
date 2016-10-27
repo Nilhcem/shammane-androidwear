@@ -1,216 +1,157 @@
 package com.nilhcem.shammane;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.CornerPathEffect;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
-import android.graphics.RadialGradient;
 import android.graphics.RectF;
 import android.graphics.Shader;
-import android.util.DisplayMetrics;
+import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 
 import com.nilhcem.shammane.core.WatchMode;
 
 public class MyWatchFaceRenderer {
 
-    private final Paint bgPaint = new Paint();
-    private final Paint mnPaint = new Paint();
-    private final Paint handHourPaint = new Paint();
-    private final Paint handMinutePaint = new Paint();
-    private final Paint handSecondPaint = new Paint();
-    private final Paint handWasherPaint = new Paint();
-    private final Paint handScrewPaint = new Paint();
-    private final Paint shadowPaint = new Paint();
-    private final Paint ambientPaint = new Paint();
-    private final Paint ambientBlackPaint = new Paint();
+    private final Context context;
 
-    private final Path mnPath = new Path();
-    private final Path handHourPath = new Path();
-    private final Path handMinutePath = new Path();
-    private final Path handSecondPath = new Path();
-    private final Path handWasherPath = new Path();
-    private final Path handScrewPath = new Path();
+    private final Paint minutesIndicatorPaint = new Paint();
+    private final Paint minutesFillPaint = new Paint();
+    private final Paint minutesBorderPaint = new Paint();
+    private final Paint ambientMinutesIndicatorPaint = new Paint();
+    private final Paint ambientMinutesBorderPaint = new Paint();
+    private final Path minutesIndicatorPath = new Path();
+    private final Path minutesCirclePath = new Path();
 
-    private final DisplayMetrics displayMetrics;
+    private final Paint hoursIndicatorPaint = new Paint();
+    private final Paint hoursFillPaint = new Paint();
+    private final Paint hoursBorderPaint = new Paint();
+    private final Paint ambientHoursIndicatorPaint = new Paint();
+    private final Paint ambientHoursBorderPaint = new Paint();
+    private final Path hoursIndicatorPath = new Path();
+    private final Path hoursCirclePath = new Path();
 
     private int size;
-    private float radius;
+    private float center;
     private WatchMode mode = WatchMode.INTERACTIVE;
 
     public MyWatchFaceRenderer(Context context) {
-        displayMetrics = context.getResources().getDisplayMetrics();
-        initPaintObjects();
+        this.context = context;
+
+        initMinutesPaintObjects(context);
+        initHoursPaintObjects(context);
+        initAmbientPaintObjects(context);
     }
 
     public void setSize(int size) {
         if (this.size != size) {
             this.size = size;
-            radius = 0.5f * size;
+            this.center = 0.5f * size;
 
-            bgPaint.setShader(new RadialGradient(radius, radius, dpToPx(8),
-                    new int[]{0xff252525, 0xff252525, Color.BLACK, Color.BLACK},
-                    new float[]{0, 0.25f, 0.25f, 1f}, Shader.TileMode.REPEAT));
-
-            mnPath.set(createMinutesIndicators(radius, radius, radius - dpToPx(10)));
-            handHourPath.set(createWatchHandPath(radius, radius, radius - dpToPx(42), dpToPx(10), dpToPx(6), handHourPaint));
-            handMinutePath.set(createWatchHandPath(radius, radius, radius - dpToPx(16), dpToPx(8), dpToPx(5), handMinutePaint));
-            handSecondPath.set(createWatchHandSecondsPath(radius, radius, radius - dpToPx(16), dpToPx(5)));
-
-            handWasherPath.reset();
-            handWasherPath.addCircle(radius, radius, dpToPx(5), Path.Direction.CW);
-
-            handScrewPath.reset();
-            handScrewPath.addCircle(radius, radius, dpToPx(2), Path.Direction.CW);
+            setPaths(minutesIndicatorPath, minutesCirclePath, center, center, 0.4f * size);
+            setPaths(hoursIndicatorPath, hoursCirclePath, center, center, 0.28f * size);
         }
     }
 
     public void setMode(WatchMode mode) {
         this.mode = mode;
-        ambientPaint.setAntiAlias(mode != WatchMode.LOW_BIT);
-        ambientBlackPaint.setAntiAlias(mode != WatchMode.LOW_BIT);
+        boolean lowBit = mode == WatchMode.LOW_BIT;
+        int color = ContextCompat.getColor(context, lowBit ? R.color.white : R.color.grey);
+
+        ambientMinutesIndicatorPaint.setColor(color);
+        ambientMinutesBorderPaint.setColor(color);
+        ambientMinutesIndicatorPaint.setAntiAlias(!lowBit);
+        ambientMinutesBorderPaint.setAntiAlias(!lowBit);
+
+        ambientHoursIndicatorPaint.setAntiAlias(!lowBit);
+        ambientHoursBorderPaint.setAntiAlias(!lowBit);
     }
 
     public void drawTime(Canvas canvas, float angleHours, float angleMinutes, float angleSeconds) {
         boolean interactive = mode == WatchMode.INTERACTIVE;
 
         // Background
-        if (interactive) {
-            canvas.drawRect(0, 0, size, size, bgPaint);
-            canvas.drawPath(mnPath, mnPaint);
-        } else {
-            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-        }
+        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
-        // Hour hand
+        // Minutes
         canvas.save();
-        canvas.rotate(angleHours, radius, radius);
+        canvas.rotate(angleMinutes, center, center);
         if (interactive) {
-            canvas.drawPath(handHourPath, shadowPaint);
+            canvas.drawPath(minutesCirclePath, minutesFillPaint);
         }
-        canvas.drawPath(handHourPath, interactive ? handHourPaint : ambientPaint);
+        canvas.drawPath(minutesCirclePath, interactive ? minutesBorderPaint : ambientMinutesBorderPaint);
+        canvas.drawPath(minutesIndicatorPath, interactive ? minutesIndicatorPaint : ambientMinutesIndicatorPaint);
         canvas.restore();
 
-        // Minute hand
+        // Hours
         canvas.save();
-        canvas.rotate(angleMinutes, radius, radius);
-        canvas.drawPath(handMinutePath, interactive ? shadowPaint : ambientBlackPaint);
-        canvas.drawPath(handMinutePath, interactive ? handMinutePaint : ambientPaint);
-        canvas.restore();
-
-        // Second hand (+ washer / screw)
+        canvas.rotate(angleHours, center, center);
         if (interactive) {
-            canvas.save();
-            canvas.rotate(angleSeconds, radius, radius);
-            canvas.drawPath(handSecondPath, handSecondPaint);
-            canvas.restore();
-
-            canvas.drawPath(handWasherPath, handWasherPaint);
-            canvas.drawPath(handScrewPath, handScrewPaint);
+            canvas.drawPath(hoursCirclePath, hoursFillPaint);
         }
+        canvas.drawPath(hoursCirclePath, interactive ? hoursBorderPaint : ambientHoursBorderPaint);
+        canvas.drawPath(hoursIndicatorPath, interactive ? hoursIndicatorPaint : ambientHoursIndicatorPaint);
+        canvas.restore();
     }
 
-    private void initPaintObjects() {
-        CornerPathEffect cornerEffect = new CornerPathEffect(dpToPx(4));
+    private void initMinutesPaintObjects(Context context) {
+        minutesIndicatorPaint.setStyle(Paint.Style.STROKE);
+        minutesIndicatorPaint.setColor(ContextCompat.getColor(context, R.color.beige));
+        minutesIndicatorPaint.setStrokeWidth(context.getResources().getDimension(R.dimen.time_stroke_width));
+        minutesIndicatorPaint.setAntiAlias(true);
 
-        bgPaint.setStyle(Paint.Style.FILL);
-        bgPaint.setAntiAlias(true);
+        minutesBorderPaint.set(minutesIndicatorPaint);
+        minutesBorderPaint.setStrokeWidth(context.getResources().getDimension(R.dimen.circle_stroke_width));
 
-        mnPaint.setStyle(Paint.Style.FILL);
-        mnPaint.setColor(Color.WHITE);
-        mnPaint.setAntiAlias(true);
-        mnPaint.setShadowLayer(4f, 2f, 2f, Color.GRAY);
-
-        handHourPaint.setStyle(Paint.Style.FILL);
-        handHourPaint.setAntiAlias(true);
-        handHourPaint.setPathEffect(cornerEffect);
-
-        handMinutePaint.set(handHourPaint);
-
-        handSecondPaint.setAntiAlias(true);
-        handSecondPaint.setStyle(Paint.Style.STROKE);
-        handSecondPaint.setColor(0xffd5cfdf);
-        handSecondPaint.setShadowLayer(1f, 4, 4f, 0xff1a1a1a);
-        handSecondPaint.setStrokeWidth(dpToPx(1.25f));
-        handSecondPaint.setPathEffect(cornerEffect);
-        handSecondPaint.setStrokeJoin(Paint.Join.ROUND);
-        handSecondPaint.setStrokeCap(Paint.Cap.ROUND);
-
-        shadowPaint.setAntiAlias(true);
-        shadowPaint.setColor(0xff1a1a1a);
-        shadowPaint.setShadowLayer(4f, 4f, 2f, 0xff1a1a1a);
-
-        ambientPaint.setAntiAlias(true);
-        ambientPaint.setStrokeWidth(dpToPx(1));
-        ambientPaint.setColor(Color.WHITE);
-        ambientPaint.setStyle(Paint.Style.STROKE);
-
-        ambientBlackPaint.set(ambientPaint);
-        ambientBlackPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        ambientBlackPaint.setColor(Color.BLACK);
-
-        handWasherPaint.setAntiAlias(true);
-        handWasherPaint.setStyle(Paint.Style.FILL);
-        handWasherPaint.setColor(0xffd5cfdf);
-        handWasherPaint.setShadowLayer(4f, 0f, 2f, 0xff1a1a1a);
-
-        handScrewPaint.setAntiAlias(true);
-        handScrewPaint.setStyle(Paint.Style.FILL);
-        handScrewPaint.setColor(0xff343436);
+        minutesFillPaint.set(minutesIndicatorPaint);
+        minutesFillPaint.setStyle(Paint.Style.FILL);
+        Bitmap dotPattern = BitmapFactory.decodeResource(context.getResources(), R.drawable.dot_pattern);
+        Shader dotShader = new BitmapShader(dotPattern, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+        minutesFillPaint.setShader(dotShader);
     }
 
-    private Path createMinutesIndicators(float centerX, float centerY, float radius) {
-        Path path = new Path();
+    private void initHoursPaintObjects(Context context) {
+        hoursIndicatorPaint.setStyle(Paint.Style.STROKE);
+        hoursIndicatorPaint.setColor(ContextCompat.getColor(context, R.color.white));
+        hoursIndicatorPaint.setStrokeWidth(context.getResources().getDimension(R.dimen.time_stroke_width));
+        hoursIndicatorPaint.setAntiAlias(true);
 
-        double angleRadians;
-        for (int i = 0; i < 60; i++) {
-            angleRadians = Math.PI * 2 / 60 * i;
-            path.addCircle((float) (centerX + radius * Math.cos(angleRadians)),
-                    (float) (centerY + radius * Math.sin(angleRadians)),
-                    dpToPx(i % 5 == 0 ? 3f : 1.5f), Path.Direction.CW);
-        }
-        return path;
+        hoursBorderPaint.set(hoursIndicatorPaint);
+        hoursBorderPaint.setStrokeWidth(context.getResources().getDimension(R.dimen.circle_stroke_width));
+
+        hoursFillPaint.set(hoursIndicatorPaint);
+        hoursFillPaint.setStyle(Paint.Style.FILL);
+        float shaderSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, context.getResources().getDisplayMetrics());
+        Shader strokeShader = new LinearGradient(0f, 0f, shaderSize, shaderSize, new int[]{Color.TRANSPARENT, Color.TRANSPARENT, Color.WHITE, Color.WHITE}, new float[]{0, 0.85f, 0.85f, 1f}, Shader.TileMode.REPEAT);
+        hoursFillPaint.setShader(strokeShader);
     }
 
-    private Path createWatchHandPath(float centerX, float centerY, float handHeight, float circleRadius, float sizeWidth, Paint paint) {
-        paint.setShader(new LinearGradient(radius - circleRadius, 0, radius + circleRadius, 0,
-                new int[]{0xff878191, 0xffaba6b3, 0xffb9b1c5, 0xffa9a2b3},
-                new float[]{0, 0.49f, 0.51f, 1f}, Shader.TileMode.CLAMP));
+    private void initAmbientPaintObjects(Context context) {
+        ambientMinutesIndicatorPaint.setStyle(Paint.Style.STROKE);
+        ambientMinutesIndicatorPaint.setColor(ContextCompat.getColor(context, R.color.white));
+        ambientMinutesIndicatorPaint.setStrokeWidth(context.getResources().getDimension(R.dimen.time_stroke_width_ambient));
+        ambientMinutesIndicatorPaint.setAntiAlias(true);
 
-        Path path = new Path();
-        path.moveTo(centerX - circleRadius - sizeWidth, centerY);
-        path.lineTo(centerX - circleRadius, centerY);
-        path.arcTo(new RectF(centerX - circleRadius, centerY - circleRadius, centerX + circleRadius, centerX + circleRadius), 180f, -180f);
-        path.lineTo(centerX + circleRadius + sizeWidth, centerY);
-        path.quadTo(centerX, centerY - circleRadius * 2f, centerX + dpToPx(1), centerY - handHeight);
-        path.lineTo(centerX - dpToPx(1), centerY - handHeight);
-        path.quadTo(centerX, centerY - circleRadius * 2f, centerX - circleRadius - sizeWidth, centerY);
+        ambientMinutesBorderPaint.set(ambientMinutesIndicatorPaint);
+        ambientMinutesBorderPaint.setStrokeWidth(context.getResources().getDimension(R.dimen.circle_stroke_width_ambient));
 
-        return path;
+        ambientHoursIndicatorPaint.set(ambientMinutesIndicatorPaint);
+        ambientHoursBorderPaint.set(ambientMinutesBorderPaint);
     }
 
-    private Path createWatchHandSecondsPath(float centerX, float centerY, float handHeight, float circleRadius) {
-        Path path = new Path();
-        path.moveTo(centerX, centerY - handHeight);
-        path.lineTo(centerX, centerY - circleRadius);
-        path.addCircle(centerX, centerY, circleRadius, Path.Direction.CW);
-        path.moveTo(centerX, centerY + circleRadius - dpToPx(1));
-        path.lineTo(centerX, centerY + circleRadius + dpToPx(8));
-        path.lineTo(centerX - dpToPx(2f), centerY + dpToPx(16));
-        path.lineTo(centerX - dpToPx(4), centerY + dpToPx(30));
-        path.lineTo(centerX + dpToPx(4), centerY + dpToPx(30));
-        path.lineTo(centerX + dpToPx(2f), centerY + dpToPx(16));
-        path.lineTo(centerX, centerY + circleRadius + dpToPx(8));
-        path.close();
+    private void setPaths(Path indicator, Path circle, float centerX, float centerY, float radius) {
+        indicator.reset();
+        indicator.moveTo(centerX, centerY);
+        indicator.lineTo(centerX, centerY - radius);
 
-        return path;
-    }
-
-    private float dpToPx(float dp) {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, displayMetrics);
+        circle.reset();
+        circle.arcTo(new RectF(centerX - radius, centerY - radius, centerX + radius, centerY + radius), 90f, 180f);
+        circle.close();
     }
 }
