@@ -37,8 +37,8 @@ public class MyWatchFaceRenderer {
     private final Path hoursIndicatorPath = new Path();
     private final Path hoursCirclePath = new Path();
 
-    private int size;
-    private float center;
+    private float centerX;
+    private float centerY;
     private WatchMode mode = WatchMode.INTERACTIVE;
 
     public MyWatchFaceRenderer(Context context) {
@@ -49,13 +49,17 @@ public class MyWatchFaceRenderer {
         initAmbientPaintObjects(context);
     }
 
-    public void setSize(int size) {
-        if (this.size != size) {
-            this.size = size;
-            this.center = 0.5f * size;
+    public void setSize(int width, int height, int chinSize) {
+        float newCenterX = 0.5f * width;
+        float newCenterY = 0.5f * (height + chinSize);
 
-            setPaths(minutesIndicatorPath, minutesCirclePath, center, center, 0.4f * size);
-            setPaths(hoursIndicatorPath, hoursCirclePath, center, center, 0.28f * size);
+        if (Math.abs(centerX - newCenterX) > 0.5f) {
+            centerX = newCenterX;
+            centerY = newCenterY;
+
+            int min = Math.min(width, height - chinSize);
+            setPaths(minutesIndicatorPath, minutesCirclePath, centerX, centerY, 0.4f * min);
+            setPaths(hoursIndicatorPath, hoursCirclePath, centerX, centerY, 0.28f * min);
         }
     }
 
@@ -81,7 +85,7 @@ public class MyWatchFaceRenderer {
 
         // Minutes
         canvas.save();
-        canvas.rotate(angleMinutes, center, center);
+        canvas.rotate(angleMinutes, centerX, centerY);
         if (interactive) {
             canvas.drawPath(minutesCirclePath, minutesFillPaint);
         }
@@ -91,7 +95,7 @@ public class MyWatchFaceRenderer {
 
         // Hours
         canvas.save();
-        canvas.rotate(angleHours, center, center);
+        canvas.rotate(angleHours, centerX, centerY);
         if (interactive) {
             canvas.drawPath(hoursCirclePath, hoursFillPaint);
         }

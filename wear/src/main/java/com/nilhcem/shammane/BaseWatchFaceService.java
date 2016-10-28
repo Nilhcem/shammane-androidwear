@@ -37,6 +37,7 @@ public abstract class BaseWatchFaceService extends CanvasWatchFaceService {
         private boolean lowBitAmbient;
 
         protected int width;
+        protected int height;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -64,9 +65,13 @@ public abstract class BaseWatchFaceService extends CanvasWatchFaceService {
 
             Point screenSize = new Point();
             ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(screenSize);
+            int chinSize = insets.getSystemWindowInsetBottom();
             int newWidth = screenSize.x;
-            if (width != newWidth) {
-                onWidthChanged(newWidth);
+            int newHeight = screenSize.y;
+            if (width != newWidth && height != newHeight) {
+                onDimensionsChanged(newWidth, newHeight, chinSize);
+                width = newWidth;
+                height = newHeight;
             }
         }
 
@@ -123,6 +128,6 @@ public abstract class BaseWatchFaceService extends CanvasWatchFaceService {
 
         protected abstract void onWatchModeChanged(WatchMode mode);
 
-        protected abstract void onWidthChanged(int newWidth);
+        protected abstract void onDimensionsChanged(int newWidth, int newHeight, int chinSize);
     }
 }

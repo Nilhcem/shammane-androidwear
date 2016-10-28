@@ -43,8 +43,8 @@ public class MyWatchFace extends BaseWatchFaceService {
         }
 
         @Override
-        protected void onWidthChanged(int newWidth) {
-            watch.setSize(newWidth);
+        protected void onDimensionsChanged(int newWidth, int newHeight, int chinSize) {
+            watch.setSize(newWidth, newHeight, chinSize);
             invalidate();
         }
 
