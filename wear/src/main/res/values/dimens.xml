@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="background_indicator_width">1.8dp</dimen>
+    <dimen name="background_indicator_height">10dp</dimen>
+
     <dimen name="time_stroke_width">4.4dp</dimen>
     <dimen name="circle_stroke_width">1.8dp</dimen>
 

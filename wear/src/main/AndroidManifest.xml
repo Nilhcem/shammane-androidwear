@@ -26,10 +26,25 @@
                 android:name="com.google.android.wearable.watchface.preview_circular"
                 android:resource="@drawable/preview_circular" />
 
+            <meta-data
+                android:name="com.google.android.wearable.watchface.wearableConfigurationAction"
+                android:value="com.nilhcem.shammane.CONFIG_WATCHFACE" />
+
             <intent-filter>
                 <action android:name="android.service.wallpaper.WallpaperService" />
                 <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
             </intent-filter>
         </service>
+
+        <activity
+            android:name=".prefs.PreferencesActivity"
+            android:theme="@style/WearAppTheme.Gray">
+            <intent-filter>
+                <action android:name="com.nilhcem.shammane.CONFIG_WATCHFACE" />
+
+                <category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

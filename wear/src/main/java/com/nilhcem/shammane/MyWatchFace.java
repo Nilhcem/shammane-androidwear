@@ -1,11 +1,13 @@
 package com.nilhcem.shammane;
 
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
 
 import com.nilhcem.shammane.core.WatchMode;
+import com.nilhcem.shammane.prefs.PreferencesHelper;
 
 public class MyWatchFace extends BaseWatchFaceService {
 
@@ -14,14 +16,18 @@ public class MyWatchFace extends BaseWatchFaceService {
         return new Engine();
     }
 
-    private class Engine extends BaseWatchFaceService.Engine {
+    private class Engine extends BaseWatchFaceService.Engine implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+        private PreferencesHelper prefs;
         private MyWatchFaceRenderer watch;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
+            prefs = new PreferencesHelper(context);
+            prefs.registerOnSharedPreferenceChangeListener(this);
             watch = new MyWatchFaceRenderer(context);
+            watch.setShowIndicators(prefs.showIndicators());
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(MyWatchFace.this)
                     .setAcceptsTapEvents(false)
@@ -51,6 +57,18 @@ public class MyWatchFace extends BaseWatchFaceService {
         @Override
         protected void onDrawTime(Canvas canvas, float angleHours, float angleMinutes, float angleSeconds) {
             watch.drawTime(canvas, angleHours, angleMinutes, angleSeconds);
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            watch.setShowIndicators(prefs.showIndicators());
+            invalidate();
+        }
+
+        @Override
+        public void onDestroy() {
+            prefs.unregisterOnSharedPreferenceChangeListener(this);
+            super.onDestroy();
         }
     }
 }

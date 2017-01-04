@@ -21,6 +21,9 @@ public class MyWatchFaceRenderer {
 
     private final Context context;
 
+    private final Paint backgroundIndicatorsPaint = new Paint();
+    private final Path backgroundIndicatorsPath = new Path();
+
     private final Paint minutesIndicatorPaint = new Paint();
     private final Paint minutesFillPaint = new Paint();
     private final Paint minutesBorderPaint = new Paint();
@@ -40,10 +43,12 @@ public class MyWatchFaceRenderer {
     private float centerX;
     private float centerY;
     private WatchMode mode = WatchMode.INTERACTIVE;
+    private boolean showIndicators;
 
     public MyWatchFaceRenderer(Context context) {
         this.context = context;
 
+        initBackgroundPaintObject();
         initMinutesPaintObjects(context);
         initHoursPaintObjects(context);
         initAmbientPaintObjects(context);
@@ -58,6 +63,7 @@ public class MyWatchFaceRenderer {
             centerY = newCenterY;
 
             int min = Math.min(width, height - chinSize);
+            setBackgroundPath(context, centerX, centerY, 0.5f * min);
             setPaths(minutesIndicatorPath, minutesCirclePath, centerX, centerY, 0.4f * min);
             setPaths(hoursIndicatorPath, hoursCirclePath, centerX, centerY, 0.28f * min);
         }
@@ -68,6 +74,8 @@ public class MyWatchFaceRenderer {
         boolean lowBit = mode == WatchMode.LOW_BIT;
         int color = ContextCompat.getColor(context, lowBit ? R.color.white : R.color.grey);
 
+        backgroundIndicatorsPaint.setAntiAlias(!lowBit);
+
         ambientMinutesIndicatorPaint.setColor(color);
         ambientMinutesBorderPaint.setColor(color);
         ambientMinutesIndicatorPaint.setAntiAlias(!lowBit);
@@ -77,11 +85,18 @@ public class MyWatchFaceRenderer {
         ambientHoursBorderPaint.setAntiAlias(!lowBit);
     }
 
+    public void setShowIndicators(boolean showIndicators) {
+        this.showIndicators = showIndicators;
+    }
+
     public void drawTime(Canvas canvas, float angleHours, float angleMinutes, float angleSeconds) {
         boolean interactive = mode == WatchMode.INTERACTIVE;
 
         // Background
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+        if (interactive && showIndicators) {
+            canvas.drawPath(backgroundIndicatorsPath, backgroundIndicatorsPaint);
+        }
 
         // Minutes
         canvas.save();
@@ -102,6 +117,13 @@ public class MyWatchFaceRenderer {
         canvas.drawPath(hoursCirclePath, interactive ? hoursBorderPaint : ambientHoursBorderPaint);
         canvas.drawPath(hoursIndicatorPath, interactive ? hoursIndicatorPaint : ambientHoursIndicatorPaint);
         canvas.restore();
+    }
+
+    private void initBackgroundPaintObject() {
+        backgroundIndicatorsPaint.setStyle(Paint.Style.STROKE);
+        backgroundIndicatorsPaint.setColor(ContextCompat.getColor(context, R.color.dark_grey));
+        backgroundIndicatorsPaint.setStrokeWidth(context.getResources().getDimension(R.dimen.background_indicator_width));
+        backgroundIndicatorsPaint.setAntiAlias(true);
     }
 
     private void initMinutesPaintObjects(Context context) {
@@ -147,6 +169,25 @@ public class MyWatchFaceRenderer {
 
         ambientHoursIndicatorPaint.set(ambientMinutesIndicatorPaint);
         ambientHoursBorderPaint.set(ambientMinutesBorderPaint);
+    }
+
+    private void setBackgroundPath(Context context, float centerX, float centerY, float radius) {
+        double angleRadians;
+        float indicatorWidth = context.getResources().getDimension(R.dimen.background_indicator_height);
+        backgroundIndicatorsPath.reset();
+
+        for (int i = 0; i < 12; i++) {
+            angleRadians = Math.PI * 2 / 12 * i;
+
+            backgroundIndicatorsPath.moveTo(
+                    (float) (centerX + (radius - indicatorWidth) * Math.cos(angleRadians)),
+                    (float) (centerY + (radius - indicatorWidth) * Math.sin(angleRadians))
+            );
+            backgroundIndicatorsPath.lineTo(
+                    (float) (centerX + radius * Math.cos(angleRadians)),
+                    (float) (centerY + radius * Math.sin(angleRadians))
+            );
+        }
     }
 
     private void setPaths(Path indicator, Path circle, float centerX, float centerY, float radius) {
