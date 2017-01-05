@@ -159,13 +159,15 @@ public class MyWatchFaceRenderer {
     }
 
     private void initAmbientPaintObjects(Context context) {
+        float maxPixelsInAmbientMode = context.getResources().getDimension(R.dimen.max_pixels_in_ambient_mode);
+
         ambientMinutesIndicatorPaint.setStyle(Paint.Style.STROKE);
         ambientMinutesIndicatorPaint.setColor(ContextCompat.getColor(context, R.color.white));
-        ambientMinutesIndicatorPaint.setStrokeWidth(context.getResources().getDimension(R.dimen.time_stroke_width_ambient));
+        ambientMinutesIndicatorPaint.setStrokeWidth(Math.min(maxPixelsInAmbientMode, context.getResources().getDimension(R.dimen.time_stroke_width_ambient)));
         ambientMinutesIndicatorPaint.setAntiAlias(true);
 
         ambientMinutesBorderPaint.set(ambientMinutesIndicatorPaint);
-        ambientMinutesBorderPaint.setStrokeWidth(context.getResources().getDimension(R.dimen.circle_stroke_width_ambient));
+        ambientMinutesBorderPaint.setStrokeWidth(Math.min(maxPixelsInAmbientMode, context.getResources().getDimension(R.dimen.circle_stroke_width_ambient)));
 
         ambientHoursIndicatorPaint.set(ambientMinutesIndicatorPaint);
         ambientHoursBorderPaint.set(ambientMinutesBorderPaint);

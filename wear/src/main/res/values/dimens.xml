@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="max_pixels_in_ambient_mode">9px</dimen>
+
     <dimen name="background_indicator_width">1.8dp</dimen>
     <dimen name="background_indicator_height">10dp</dimen>
 
