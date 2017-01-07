@@ -13,6 +13,7 @@ import android.view.WindowManager;
 import com.nilhcem.shammane.core.TimerHelper;
 import com.nilhcem.shammane.core.TimezoneHelper;
 import com.nilhcem.shammane.core.WatchMode;
+import com.nilhcem.shammane.core.WatchShape;
 
 import java.util.Calendar;
 
@@ -35,6 +36,7 @@ public abstract class BaseWatchFaceService extends CanvasWatchFaceService {
         protected Context context;
         private boolean ambient;
         private boolean lowBitAmbient;
+        private WatchShape shape;
 
         protected int width;
         protected int height;
@@ -63,15 +65,17 @@ public abstract class BaseWatchFaceService extends CanvasWatchFaceService {
         public void onApplyWindowInsets(WindowInsets insets) {
             super.onApplyWindowInsets(insets);
 
+            WatchShape newShape = insets.isRound() ? WatchShape.CIRCLE : WatchShape.SQUARE;
             Point screenSize = new Point();
             ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(screenSize);
             int chinSize = insets.getSystemWindowInsetBottom();
             int newWidth = screenSize.x;
             int newHeight = screenSize.y;
-            if (width != newWidth && height != newHeight) {
-                onDimensionsChanged(newWidth, newHeight, chinSize);
+            if (width != newWidth || height != newHeight || !newShape.equals(shape)) {
+                onScreenSizeChanged(newWidth, newHeight, chinSize, newShape);
                 width = newWidth;
                 height = newHeight;
+                shape = newShape;
             }
         }
 
@@ -128,6 +132,6 @@ public abstract class BaseWatchFaceService extends CanvasWatchFaceService {
 
         protected abstract void onWatchModeChanged(WatchMode mode);
 
-        protected abstract void onDimensionsChanged(int newWidth, int newHeight, int chinSize);
+        protected abstract void onScreenSizeChanged(int newWidth, int newHeight, int chinSize, WatchShape shape);
     }
 }

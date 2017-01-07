@@ -16,6 +16,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 
 import com.nilhcem.shammane.core.WatchMode;
+import com.nilhcem.shammane.core.WatchShape;
 
 public class MyWatchFaceRenderer {
 
@@ -54,18 +55,17 @@ public class MyWatchFaceRenderer {
         initAmbientPaintObjects(context);
     }
 
-    public void setSize(int width, int height, int chinSize) {
+    public void setSize(int width, int height, int chinSize, WatchShape shape) {
         float newCenterX = 0.5f * width;
         float newCenterY = 0.5f * (height + chinSize);
 
         if (Math.abs(centerX - newCenterX) > 0.5f) {
             centerX = newCenterX;
             centerY = newCenterY;
-
-            int min = Math.min(width, height - chinSize);
-            setBackgroundPath(context, centerX, centerY, 0.5f * min);
-            setPaths(minutesIndicatorPath, minutesCirclePath, centerX, centerY, 0.4f * min);
-            setPaths(hoursIndicatorPath, hoursCirclePath, centerX, centerY, 0.28f * min);
+            float radius = 0.5f * Math.min(width, height - chinSize);
+            setBackgroundPath(centerX, centerY, radius, shape);
+            setPaths(minutesIndicatorPath, minutesCirclePath, centerX, centerY, 0.8f * radius);
+            setPaths(hoursIndicatorPath, hoursCirclePath, centerX, centerY, 0.56f * radius);
         }
     }
 
@@ -173,21 +173,34 @@ public class MyWatchFaceRenderer {
         ambientHoursBorderPaint.set(ambientMinutesBorderPaint);
     }
 
-    private void setBackgroundPath(Context context, float centerX, float centerY, float radius) {
+    private void setBackgroundPath(float centerX, float centerY, float radius, WatchShape shape) {
+        float outerRadius;
+        float innerRadius;
+        float indicatorWidth = 0.1f * radius;
+
+        if (shape == WatchShape.SQUARE) {
+            // outer radius: square diagonal / 2
+            // inner radius: top of the visible screen - indicatorWidth
+            outerRadius = (float) Math.sqrt(Math.pow(centerX, 2) + Math.pow(centerY, 2));
+            innerRadius = centerY - indicatorWidth;
+        } else {
+            outerRadius = radius;
+            innerRadius = radius - indicatorWidth;
+        }
+
         double angleRadians;
-        float indicatorWidth = context.getResources().getDimension(R.dimen.background_indicator_height);
         backgroundIndicatorsPath.reset();
 
         for (int i = 0; i < 12; i++) {
             angleRadians = Math.PI * 2 / 12 * i;
 
             backgroundIndicatorsPath.moveTo(
-                    (float) (centerX + (radius - indicatorWidth) * Math.cos(angleRadians)),
-                    (float) (centerY + (radius - indicatorWidth) * Math.sin(angleRadians))
+                    (float) (centerX + innerRadius * Math.cos(angleRadians)),
+                    (float) (centerY + innerRadius * Math.sin(angleRadians))
             );
             backgroundIndicatorsPath.lineTo(
-                    (float) (centerX + radius * Math.cos(angleRadians)),
-                    (float) (centerY + radius * Math.sin(angleRadians))
+                    (float) (centerX + outerRadius * Math.cos(angleRadians)),
+                    (float) (centerY + outerRadius * Math.sin(angleRadians))
             );
         }
     }

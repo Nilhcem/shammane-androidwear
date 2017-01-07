@@ -7,6 +7,7 @@ import android.view.Gravity;
 import android.view.SurfaceHolder;
 
 import com.nilhcem.shammane.core.WatchMode;
+import com.nilhcem.shammane.core.WatchShape;
 import com.nilhcem.shammane.prefs.PreferencesHelper;
 
 public class MyWatchFace extends BaseWatchFaceService {
@@ -49,8 +50,8 @@ public class MyWatchFace extends BaseWatchFaceService {
         }
 
         @Override
-        protected void onDimensionsChanged(int newWidth, int newHeight, int chinSize) {
-            watch.setSize(newWidth, newHeight, chinSize);
+        protected void onScreenSizeChanged(int newWidth, int newHeight, int chinSize, WatchShape shape) {
+            watch.setSize(newWidth, newHeight, chinSize, shape);
             invalidate();
         }
 
