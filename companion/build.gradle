@@ -22,5 +22,6 @@ android {
 }
 
 dependencies {
+    compile project(':common')
     wearApp project(':wear')
 }

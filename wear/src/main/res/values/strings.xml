@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Shammane</string>
     <string name="prefs_show_indicators">Show indicators</string>
 </resources>
