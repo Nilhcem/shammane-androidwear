@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.nilhcem.shammane">
+<manifest package="com.nilhcem.shammane"
+          xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-feature android:name="android.hardware.type.watch" />
+    <uses-feature android:name="android.hardware.type.watch"/>
 
     <!-- Required to act as a custom watch face. -->
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <application
         android:allowBackup="true"
@@ -18,21 +18,21 @@
 
             <meta-data
                 android:name="android.service.wallpaper"
-                android:resource="@xml/watch_face" />
+                android:resource="@xml/watch_face"/>
             <meta-data
                 android:name="com.google.android.wearable.watchface.preview"
-                android:resource="@drawable/preview_square" />
+                android:resource="@drawable/preview_square"/>
             <meta-data
                 android:name="com.google.android.wearable.watchface.preview_circular"
-                android:resource="@drawable/preview_circular" />
+                android:resource="@drawable/preview_circular"/>
 
             <meta-data
                 android:name="com.google.android.wearable.watchface.wearableConfigurationAction"
-                android:value="com.nilhcem.shammane.CONFIG_WATCHFACE" />
+                android:value="com.nilhcem.shammane.CONFIG_WATCHFACE"/>
 
             <intent-filter>
-                <action android:name="android.service.wallpaper.WallpaperService" />
-                <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
+                <action android:name="android.service.wallpaper.WallpaperService"/>
+                <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE"/>
             </intent-filter>
         </service>
 
@@ -40,10 +40,10 @@
             android:name=".prefs.PreferencesActivity"
             android:theme="@style/WearAppTheme.Gray">
             <intent-filter>
-                <action android:name="com.nilhcem.shammane.CONFIG_WATCHFACE" />
+                <action android:name="com.nilhcem.shammane.CONFIG_WATCHFACE"/>
 
-                <category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
     </application>
