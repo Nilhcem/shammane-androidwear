@@ -5,7 +5,7 @@ android {
     buildToolsVersion project.ext['buildToolsVersion']
 
     defaultConfig {
-        applicationId 'com.nilhcem.shammane'
+        applicationId project.ext['applicationId']
         versionCode project.ext['versionCode']
         versionName project.ext['versionName']
 

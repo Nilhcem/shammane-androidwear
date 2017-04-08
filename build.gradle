@@ -13,6 +13,7 @@ allprojects {
     }
 
     project.ext {
+        applicationId = 'com.nilhcem.shammane'
         versionCode = 2
         versionName = '1.1.0'
         compileSdkVersion = 25
