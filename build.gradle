@@ -14,11 +14,14 @@ allprojects {
 
     project.ext {
         applicationId = 'com.nilhcem.shammane'
-        versionCode = 2
-        versionName = '1.1.0'
         compileSdkVersion = 25
         targetSdkVersion = 25
         buildToolsVersion = '25.0.2'
+
+        versionName = '1.2.0'
+        def buildNumber = '01'
+        def multiApkVariant = '00'
+        versionCode = versionName.replace('.', '') + buildNumber + multiApkVariant
     }
 }
 
